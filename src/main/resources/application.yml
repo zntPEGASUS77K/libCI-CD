@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/lib
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: ${DB_USERNAME:masterpiece}
+    password: ${DB_PASSWORD:zntPEGASUS77K}
   jpa:
     hibernate:
       ddl-auto: update
@@ -10,3 +10,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+api:
+  version:
+    current: v1
+    path-prefix: /api/{version}
+    supported:
+      - v1
+      - v2
