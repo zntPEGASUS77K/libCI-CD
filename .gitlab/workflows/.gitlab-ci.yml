@@ -1,0 +1,77 @@
+stages:
+  - build
+  - test
+  - docker
+  - deploy
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"
+  DOCKER_IMAGE_NAME: "registry.gitlab.com/zntpegasus77k/libci"
+  DOCKER_TAG: "$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .gradle/
+    - build/
+
+build_job:
+  stage: build
+  image: gradle:8.7-jdk21
+  script:
+    - gradle build --no-daemon -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+test_job:
+  stage: test
+  image: gradle:8.7-jdk21
+  services:
+    - postgres:16
+  variables:
+    SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/lib"
+    SPRING_DATASOURCE_USERNAME: "masterpiece"
+    SPRING_DATASOURCE_PASSWORD: "zntPEGASUS77K"
+    SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+  script:
+    - gradle test --no-daemon
+  artifacts:
+    paths:
+      - build/test-results/test/
+    reports:
+      junit: build/test-results/test/TEST-*.xml
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+docker_build:
+  stage: docker
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .
+    - docker push $DOCKER_IMAGE_NAME:$DOCKER_TAG
+  only:
+    - main
+    - develop
+
+deploy_to_production:
+  stage: deploy
+  image: docker:stable
+  services:
+    - docker:dind
+  script:
+    - echo "Déploiement vers un serveur de production (à configurer selon votre environnement)"
+    - echo "docker-compose up -d"
+  when: manual
+  only:
+    - main

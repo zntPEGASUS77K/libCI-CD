@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/lib
+      - SPRING_DATASOURCE_USERNAME=masterpiece
+      - SPRING_DATASOURCE_PASSWORD=zntPEGASUS77K
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+    networks:
+      - lib-network
+
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=lib
+      - POSTGRES_USER=masterpiece
+      - POSTGRES_PASSWORD=zntPEGASUS77K
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - lib-network
+
+volumes:
+  db-data:
+
+networks:
+  lib-network:
+    driver: bridge
