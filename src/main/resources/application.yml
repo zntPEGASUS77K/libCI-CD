@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/lib
-    username: ${DB_USERNAME:masterpiece}
-    password: ${DB_PASSWORD:zntPEGASUS77K}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/lib}
+    username: ${SPRING_DATASOURCE_USERNAME:masterpiece}
+    password: ${SPRING_DATASOURCE_PASSWORD:zntPEGASUS77K}
   jpa:
     hibernate:
       ddl-auto: update
@@ -10,6 +10,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+      hikari:
+        connection-timeout: 30000
+        maximum-pool-size: 10
+        max-lifetime: 1800000
+        initialization-fail-timeout: 0
 
 api:
   version:

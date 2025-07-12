@@ -11,7 +11,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=zntPEGASUS77K
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - lib-network
 
@@ -25,6 +26,13 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U masterpiece -d lib"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - lib-network
 
